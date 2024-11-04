@@ -4,7 +4,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import HomeScreen from '../screen/HomeScreen';
 import EditorScreen from '../screen/EditorScreen';
-
+import ExportScreen from '../screen/ExportScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +18,7 @@ const Navigation = () => {
         })}>
         <Stack.Screen name="HomeScreen" component={HomeScreen} />
         <Stack.Screen name="EditorScreen" component={EditorScreen} />
+        <Stack.Screen name="ExportScreen" component={ExportScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

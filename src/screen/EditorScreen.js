@@ -1,35 +1,37 @@
 import {
-  ScrollView,
   StyleSheet,
   Text,
   Modal,
   TouchableOpacity,
+  StatusBar,
   View,
 } from 'react-native';
 import React, {useEffect, useState, useRef} from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation, useRoute} from '@react-navigation/native';
+import { Colors } from '../constant/Color';
 import Video from 'react-native-video';
-import {Colors} from '../constant/Color';
-import {deviceWidth, deviceHeight} from '../constant/Scaling';
-import {Dimensions} from 'react-native';
+import Timeline from '../components/Timeline';
+import Bottom from '../components/Bottom';
 
-const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
 const EditorScreen = () => {
-
-  const iconsize = screenWidth * 0.07;
+ 
   const options = ['480P', '720P', '1080P', '1440P', '2160P'];
-  const {videoUri} = route.params;
-  const navigation = useNavigation();
   const route = useRoute();
+  const {videoUri} = route.params;
+  const scrollViewRef = useRef(null);
+  const videoRef = useRef(null);
+  const navigation = useNavigation();
   const [selectedOption, setSelectedOption] = useState('1080P');
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({top: 0, left: 0});
-  const dropdownButtonRef = useRef(null); 
+  const dropdownButtonRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(1); 
+  const [volume, setVolume] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(1);
+  const [isInfoModalVisible, setInfoModalVisible] = useState(false);
 
   const handleOptionSelect = option => {
     setSelectedOption(option);
@@ -43,8 +45,24 @@ const EditorScreen = () => {
     });
   };
 
+  const handleLoad = meta => {
+    setDuration(meta.duration); // Set duration when video loads
+  };
+
+  const handleTimelinePress = time => {
+    setCurrentTime(time);
+    videoRef.current?.seek(time); // Ensure the video jumps to the pressed time
+  };
+
   const handleProgress = data => {
     setCurrentTime(data.currentTime);
+
+    if (scrollViewRef.current) {
+      const thumbnailWidth = 75; // Ensure this matches the width of each thumbnail in the timeline
+      const scrollPosition =
+        (data.currentTime / duration) * (thumbnailWidth * 10); // Assuming 10 thumbnails
+      scrollViewRef.current.scrollTo({x: scrollPosition, animated: true});
+    }
   };
 
   const handlePlayPause = () => {
@@ -62,6 +80,7 @@ const EditorScreen = () => {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" hidden={false} backgroundColor={Colors.BackgroundColor} translucent={false} />
       <View style={styles.flexrow}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="close" size={25} color="#ffffff" />
@@ -102,13 +121,14 @@ const EditorScreen = () => {
               </TouchableOpacity>
             </Modal>
           )}
-
+          <TouchableOpacity onPress={()=>navigation.navigate('ExportScreen')}>
           <Icon
             name="start"
             size={25}
             color="#ffffff"
-            style={{marginLeft: 10, transform: [{rotate: '270deg'}]}}
+            style={{marginLeft: 20, transform: [{rotate: '270deg'}]}}
           />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -119,9 +139,10 @@ const EditorScreen = () => {
             style={styles.video}
             controls={false}
             resizeMode="none"
-            volume={volume} 
-            onProgress={handleProgress} 
+            onProgress={handleProgress}
+            onLoad={handleLoad}
             paused={!isPlaying}
+            volume={volume}
           />
         ) : (
           <Text>No Video</Text>
@@ -144,70 +165,22 @@ const EditorScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.flexrow3}></View>
+      <View style={styles.flexrow3}>
+        <Timeline
+          videoUri={videoUri}
+          currentTime={currentTime}
+          onThumbnailPress={handleTimelinePress}
+          scrollViewRef={scrollViewRef}
+          duration={duration}
+        />
+      </View>
       <View style={styles.flexrow4}>
-        <ScrollView
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}>
-          <View style={styles.iconstyle}>
-            {[
-              'Text',
-              'Canvas',
-              'Ratio',
-              'Filter',
-              'Freeze',
-              'Music',
-              'Volume',
-              'Crop',
-              'Split',
-              'Sticker',
-              'PIP',
-            ].map((label, index) => (
-              <View style={styles.iconContainer} key={index}>
-                <Icon
-                  name={getIconName(label)}
-                  size={iconsize}
-                  style={styles.icon}
-                />
-                <Text style={styles.label}>{label}</Text>
-              </View>
-            ))}
-          </View>
-        </ScrollView>
+        <Bottom/>
       </View>
     </View>
   );
 };
 
-const getIconName = label => {
-  switch (label) {
-    case 'Text':
-      return 'text-fields';
-    case 'Canvas':
-      return 'brush';
-    case 'Ratio':
-      return 'aspect-ratio';
-    case 'Filter':
-      return 'filter';
-    case 'Freeze':
-      return 'ac-unit';
-    case 'Music':
-      return 'music-note';
-    case 'Volume':
-      return 'volume-up';
-    case 'Crop':
-      return 'crop';
-    case 'Split':
-      return 'content-cut';
-    case 'Sticker':
-      return 'emoji-emotions';
-    case 'PIP':
-      return 'picture-in-picture';
-    default:
-      return 'help';
-  }
-};
 
 export default EditorScreen;
 
@@ -220,7 +193,7 @@ const styles = StyleSheet.create({
   flexrow: {
     width: '100%',
     flex: 0.07,
-    backgroundColor: 'black',
+    backgroundColor: Colors.BackgroundColor,
     paddingHorizontal: 25,
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -262,7 +235,7 @@ const styles = StyleSheet.create({
     width: '100%',
     flex: 0.4,
     padding: 15,
-    backgroundColor: 'black',
+    backgroundColor: Colors.BackgroundColor,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -279,39 +252,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     paddingHorizontal: 35,
-    backgroundColor: 'grey',
+    backgroundColor: Colors.BackgroundColor,
   },
   flexrow3: {
     width: '100%',
     flex: 0.43,
-    backgroundColor: 'blue',
+    backgroundColor: Colors.BackgroundColor,
   },
   flexrow4: {
     width: '100%',
     flex: 0.1,
-    backgroundColor: 'black',
-  },
-  scrollContent: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 10,
-  },
-  iconstyle: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginHorizontal: 15,
-    marginVertical: 10,
-  },
-  icon: {
-    color: '#ffffff',
-  },
-  label: {
-    marginTop: 5,
-    color: '#ffffff',
-    fontSize: 12,
+    backgroundColor: Colors.BackgroundColor,
   },
 });

@@ -1,7 +1,10 @@
 export const Colors = {
 
-    StartColor : '#96D4F0',
-    EndColor : '#59D3EA',
+    StartColor : '#B2FEFA',
+    EndColor : '#0ED2F7',
     BackgroundColor : '#181818',
+    ExStartColor:'#3494E6',
+    ExEndColor:'#EC6EAD',
+
 
 };
