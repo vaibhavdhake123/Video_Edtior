@@ -1,4 +1,4 @@
-package com.videomaster
+package com.videomaster.pawsomecreation
 
 import android.app.Application
 import com.facebook.react.PackageList

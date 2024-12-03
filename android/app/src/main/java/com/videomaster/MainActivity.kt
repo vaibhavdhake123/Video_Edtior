@@ -1,4 +1,4 @@
-package com.videomaster
+package com.videomaster.pawsomecreation
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

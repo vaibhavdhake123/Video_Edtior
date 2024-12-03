@@ -2,14 +2,25 @@ import {
   StyleSheet,
   Text,
   View,
+  Modal,
   ScrollView,
   TouchableOpacity,
-  Modal,
 } from 'react-native';
-import React, {useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import React, { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {iconsize} from '../constant/Scaling';
+import { iconsize } from '../constant/Scaling';
+
+import CanvasModal from '../modal/CanvasModal';
+import TextModal from '../modal/TextModal';
+import Sticker from '../modal/StickerModal';
+import FilterModal from '../modal/FilterModal';
+import MusicModal from '../modal/MusicModal';
+import VolumeModel from '../modal/VolumeModel';
+import CropModal from '../modal/CropModal';
+import SplliteModal from '../modal/SplliteModal';
+import StickerModal from '../modal/StickerModal';
+
 
 const Bottom = () => {
   const navigation = useNavigation();
@@ -129,149 +140,55 @@ const Bottom = () => {
         </View>
       </ScrollView>
 
-      {/*Canvas Modal*/}
-      <Modal
-        transparent={true}
+      {/* Canvas Modal */}
+      <CanvasModal
         visible={isCanvasModalVisible}
-        animationType="fade"
-        onRequestClose={hideCanvasModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hideCanvasModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
+        onClose={hideCanvasModal}
+      />
 
-      {/* Text Modal */}
-      <Modal
-        transparent={true}
-        visible={isTextModalVisible}
-        animationType="fade"
-        onRequestClose={hideTextModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hideTextModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
+      {/* TextModal */}
+      <TextModal
+      visible={isTextModalVisible}
+      onClose={hideTextModal}/>
 
       {/* Sticker */}
-      <Modal
-        transparent={true}
+      <StickerModal
         visible={isStickerModalVisible}
-        animationType="fade"
-        onRequestClose={hideStickerModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hideStickerModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
+        onClose={hideStickerModal}
+      />
 
-      {/* Filter */}
-      <Modal
-        transparent={true}
+      {/* FilterModal */}
+      <FilterModal
         visible={isFilterModalVisible}
-        animationType="fade"
-        onRequestClose={hideFilterModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hideFilterModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
+        onClose={hideFilterModal}
+      />
 
-      {/* Music */}
-      <Modal
-        transparent={true}
+      {/* MusicModal */}
+      <MusicModal
         visible={isMusicModalVisible}
-        animationType="fade"
-        onRequestClose={hideMusicModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hideMusicModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
+        onClose={hideMusicModal}
+      />
 
-
-      {/* Volume */}
-      <Modal
-        transparent={true}
+      {/* VolumeModel */}
+      <VolumeModel
         visible={isVolumeModalVisible}
-        animationType="fade"
-        onRequestClose={hideVolumeModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hideVolumeModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
+        onClose={hideVolumeModal}
+      />
 
-      {/* Crop */}
-      <Modal
-        transparent={true}
+      {/* CropModal */}
+      <CropModal
         visible={isCropModalVisible}
-        animationType="fade"
-        onRequestClose={hideCropModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hideCropModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
+        onClose={hideCropModal}
+      />
 
-      {/* Split */}
-      <Modal
-        transparent={true}
+      {/* SplliteModal */}
+      <SplliteModal
         visible={isSplitModalVisible}
-        animationType="fade"
-        onRequestClose={hideSplitModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hideSplitModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
+        onClose={hideSplitModal}
+      />
 
-      {/* PIP */}
-      <Modal
-        transparent={true}
-        visible={isPIPModalVisible}
-        animationType="fade"
-        onRequestClose={hidePIPModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hidePIPModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
-
-      {/* Freeze */}
-      <Modal
-        transparent={true}
-        visible={isFreezeModalVisible}
-        animationType="fade"
-        onRequestClose={hideFreezeModal}>
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPressOut={hideFreezeModal}>
-          <View style={styles.modalContent}></View>
-        </TouchableOpacity>
-      </Modal>
-
-
-    </View>
+     </View>
+    
   );
 };
 
@@ -311,13 +228,12 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: '90%',
-    padding: 40,
+    padding: 15,
     backgroundColor: 'white',
     borderRadius: 10,
-    alignItems: 'center',
     elevation: 5,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 5,
     margin: 100,

@@ -10,6 +10,10 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://company/com/maven2") }
+        flatDir {
+            dirs "libs"
+        }
     }
     dependencies {
         classpath("com.android.tools.build:gradle")

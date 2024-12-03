@@ -1,3 +1,5 @@
+import Timeline from "../components/Timeline";
+
 export const Colors = {
 
     StartColor : '#B2FEFA',
@@ -5,6 +7,7 @@ export const Colors = {
     BackgroundColor : '#181818',
     ExStartColor:'#3494E6',
     ExEndColor:'#EC6EAD',
+    TimelineColor:'#22dcc0'
 
 
 };

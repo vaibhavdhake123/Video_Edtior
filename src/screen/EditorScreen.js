@@ -4,24 +4,26 @@ import {
   Modal,
   TouchableOpacity,
   StatusBar,
+  ScrollView,
+  Image,
   View,
 } from 'react-native';
+import RNFS from 'react-native-fs';
 import React, {useEffect, useState, useRef} from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import { Colors } from '../constant/Color';
+import {Colors} from '../constant/Color';
 import Video from 'react-native-video';
-import Timeline from '../components/Timeline';
 import Bottom from '../components/Bottom';
-
+import {deviceWidth} from '../constant/Scaling';
+import Timeline from '../components/Timeline';
+import {generateThumbnails} from '../opreations/generateThumbnails';
 
 const EditorScreen = () => {
- 
   const options = ['480P', '720P', '1080P', '1440P', '2160P'];
   const route = useRoute();
   const {videoUri} = route.params;
   const scrollViewRef = useRef(null);
-  const videoRef = useRef(null);
   const navigation = useNavigation();
   const [selectedOption, setSelectedOption] = useState('1080P');
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -31,7 +33,8 @@ const EditorScreen = () => {
   const [volume, setVolume] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(1);
-  const [isInfoModalVisible, setInfoModalVisible] = useState(false);
+  const [timelineWidth, setTimelineWidth] = useState(0);
+  const [thumbnail, setThumbnail] = useState([]);
 
   const handleOptionSelect = option => {
     setSelectedOption(option);
@@ -46,21 +49,16 @@ const EditorScreen = () => {
   };
 
   const handleLoad = meta => {
-    setDuration(meta.duration); // Set duration when video loads
+    setDuration(meta.duration); // Ensure video duration is correctly set
+    const calculatedWidth = (deviceWidth * meta.duration) / 60; // Adjust scaling
+    setTimelineWidth(calculatedWidth);
   };
-
-  const handleTimelinePress = time => {
-    setCurrentTime(time);
-    videoRef.current?.seek(time); // Ensure the video jumps to the pressed time
-  };
+  
 
   const handleProgress = data => {
     setCurrentTime(data.currentTime);
-
     if (scrollViewRef.current) {
-      const thumbnailWidth = 75; // Ensure this matches the width of each thumbnail in the timeline
-      const scrollPosition =
-        (data.currentTime / duration) * (thumbnailWidth * 10); // Assuming 10 thumbnails
+      const scrollPosition = (data.currentTime / duration) * timelineWidth;
       scrollViewRef.current.scrollTo({x: scrollPosition, animated: true});
     }
   };
@@ -78,9 +76,40 @@ const EditorScreen = () => {
     )}`;
   };
 
+  useEffect(() => {
+    const outDir = `${RNFS.CachesDirectoryPath}/thumbnails`;
+    const interval = 5; // Generate a thumbnail every 5 seconds
+  
+    const fetchThumbnails = async () => {
+      try {
+        // Clear old thumbnails if any
+        if (await RNFS.exists(outDir)) {
+          await RNFS.unlink(outDir);
+        }
+        await RNFS.mkdir(outDir);
+  
+        // Generate thumbnails
+        const generatedThumbnails = await generateThumbnails(videoUri, interval, duration);
+        setThumbnail(generatedThumbnails);
+      } catch (error) {
+        console.error('Error generating thumbnails:', error);
+      }
+    };
+  
+    if (duration > 1) {
+      fetchThumbnails();
+    }
+  }, [videoUri, duration]);
+  
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" hidden={false} backgroundColor={Colors.BackgroundColor} translucent={false} />
+      <StatusBar
+        barStyle="dark-content"
+        hidden={false}
+        backgroundColor={Colors.BackgroundColor}
+        translucent={false}
+      />
       <View style={styles.flexrow}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="close" size={25} color="#ffffff" />
@@ -121,13 +150,13 @@ const EditorScreen = () => {
               </TouchableOpacity>
             </Modal>
           )}
-          <TouchableOpacity onPress={()=>navigation.navigate('ExportScreen')}>
-          <Icon
-            name="start"
-            size={25}
-            color="#ffffff"
-            style={{marginLeft: 20, transform: [{rotate: '270deg'}]}}
-          />
+          <TouchableOpacity onPress={() => navigation.navigate('ExportScreen')}>
+            <Icon
+              name="start"
+              size={25}
+              color="#ffffff"
+              style={{marginLeft: 20, transform: [{rotate: '270deg'}]}}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -165,22 +194,23 @@ const EditorScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
+
       <View style={styles.flexrow3}>
-        <Timeline
-          videoUri={videoUri}
-          currentTime={currentTime}
-          onThumbnailPress={handleTimelinePress}
-          scrollViewRef={scrollViewRef}
-          duration={duration}
-        />
+        {thumbnail.length > 0 ? (
+          <Timeline thumbnails={thumbnail} />
+        ) : (
+          <Text style={{color: '#ffffff', textAlign: 'center'}}>
+            Generating thumbnails...
+          </Text>
+        )}
       </View>
+
       <View style={styles.flexrow4}>
-        <Bottom/>
+        <Bottom />
       </View>
     </View>
   );
 };
-
 
 export default EditorScreen;
 
@@ -233,7 +263,7 @@ const styles = StyleSheet.create({
   },
   flexrow2: {
     width: '100%',
-    flex: 0.4,
+    flex: 0.5,
     padding: 15,
     backgroundColor: Colors.BackgroundColor,
     justifyContent: 'center',
@@ -256,8 +286,9 @@ const styles = StyleSheet.create({
   },
   flexrow3: {
     width: '100%',
-    flex: 0.43,
+    flex: 0.33,
     backgroundColor: Colors.BackgroundColor,
+    justifyContent: 'center',
   },
   flexrow4: {
     width: '100%',
